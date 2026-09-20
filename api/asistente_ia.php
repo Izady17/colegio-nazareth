@@ -13,7 +13,6 @@ if (empty($pregunta)) {
 $api_key = ""; 
 
 // 2. Endpoint oficial
-$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
 $system_instruction = "Eres el 'Asistente Nazareth IA', la inteligencia artificial de la Unidad Educativa 'Jesús de Nazareth'. " .
     "Responde de forma amable, clara y concisa en un máximo de 2 párrafos cortos.";
