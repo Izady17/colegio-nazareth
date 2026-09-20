@@ -11,6 +11,57 @@ require_once "../includes/conexion.php";
 
 $mensaje = "";
 
+$confirmar_forzado = null;
+
+function usuarioTieneHistorial($conexion, $id_usuario) {
+    $checks = [
+        ["notas_actividades", "id_estudiante"],
+        ["asistencia_detalle", "id_estudiante"],
+        ["autoevaluaciones", "id_estudiante"],
+        ["boletin_trimestral", "id_estudiante"],
+        ["tareas", "id_docente"],
+        ["recordatorios", "id_docente"],
+        ["configuracion_dimensiones", "id_docente"],
+        ["avisos", "id_admin"],
+        ["noticias", "id_admin"],
+        ["eventos", "id_admin"],
+    ];
+    foreach ($checks as [$tabla, $columna]) {
+        $stmt = mysqli_prepare($conexion, "SELECT COUNT(*) as total FROM `$tabla` WHERE `$columna` = ?");
+        mysqli_stmt_bind_param($stmt, "i", $id_usuario);
+        mysqli_stmt_execute($stmt);
+        $total = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+        mysqli_stmt_close($stmt);
+        if ($total > 0) return true;
+    }
+    return false;
+}
+
+// Eliminar usuario permanentemente
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'eliminar') {
+    $id = intval($_POST['id_usuario'] ?? 0);
+    $forzar = ($_POST['forzar'] ?? '') === '1';
+
+    if ($id === intval($_SESSION['id_usuario'])) {
+        $mensaje = "No podés eliminar tu propia cuenta mientras estás conectado.";
+    } elseif ($id > 0) {
+        if (!$forzar && usuarioTieneHistorial($conexion, $id)) {
+            $stmt_u = mysqli_prepare($conexion, "SELECT id_usuario, nombres, apellidos FROM usuarios WHERE id_usuario = ?");
+            mysqli_stmt_bind_param($stmt_u, "i", $id);
+            mysqli_stmt_execute($stmt_u);
+            $confirmar_forzado = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt_u));
+            mysqli_stmt_close($stmt_u);
+        } else {
+            $stmt = mysqli_prepare($conexion, "DELETE FROM usuarios WHERE id_usuario = ?");
+            mysqli_stmt_bind_param($stmt, "i", $id);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+            $mensaje = "Usuario eliminado permanentemente.";
+        }
+    }
+    
+}
+
 // Activar / Desactivar cuenta
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'cambiar_estado') {
     $id = intval($_POST['id_usuario'] ?? 0);
@@ -343,6 +394,33 @@ require_once "../includes/header_panel.php";
         <?php echo htmlspecialchars($mensaje); ?>
     </div>
 <?php endif; ?>
+<?php if ($mensaje): ?>
+    <div class="card" style="background-color: #d1e7dd; color: #0f5132; padding:12px; border-radius:8px; margin-bottom: 20px;">
+        <?php echo htmlspecialchars($mensaje); ?>
+    </div>
+<?php endif; ?>
+
+<?php if ($confirmar_forzado): ?>
+    <div class="card" style="background-color:#fff3cd; border:2px solid #d97706; padding:15px; border-radius:8px; margin-bottom:20px;">
+        <h3 style="color:#92400e; margin-bottom:8px;">⚠️ Este usuario tiene historial académico</h3>
+        <p style="color:#78350f; margin-bottom:12px;">
+            <strong><?php echo htmlspecialchars($confirmar_forzado['apellidos'] . ' ' . $confirmar_forzado['nombres']); ?></strong>
+            tiene notas, asistencia o registros asociados. Si lo eliminás, <strong>ese historial se borra también y no se puede deshacer</strong>.
+            Si preferís conservar los datos, usá "Desactivar" en la tabla de abajo en vez de eliminar.
+        </p>
+        <div style="display:flex; gap:10px;">
+            <form action="usuarios.php?rol=<?php echo $filtro_rol; ?>" method="POST" onsubmit="return confirm('Última confirmación: se borrará TODO el historial de este usuario. ¿Continuar?');">
+                <input type="hidden" name="accion" value="eliminar">
+                <input type="hidden" name="id_usuario" value="<?php echo $confirmar_forzado['id_usuario']; ?>">
+                <input type="hidden" name="forzar" value="1">
+                <button type="submit" style="background:#dc2626;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">Sí, eliminar de todas formas</button>
+            </form>
+            <a href="usuarios.php?rol=<?php echo $filtro_rol; ?>" style="align-self:center; color:#78350f;">Cancelar</a>
+        </div>
+    </div>
+<?php endif; ?>
+
+<!-- Tarjetas KPI -->
 
 <!-- Tarjetas KPI -->
 <div class="kpi-grid">
@@ -476,17 +554,26 @@ require_once "../includes/header_panel.php";
                             <?php endif; ?>
                         </td>
                         <td style="text-align: center;">
-                            <div style="display:flex; justify-content:center; gap:6px;">
-                                <form action="usuarios.php?rol=<?php echo $filtro_rol; ?>" method="POST" onsubmit="return confirm('¿Confirmas cambiar el estado de este usuario?');">
-                                    <input type="hidden" name="accion" value="cambiar_estado">
-                                    <input type="hidden" name="id_usuario" value="<?php echo $u['id_usuario']; ?>">
-                                    <input type="hidden" name="nuevo_estado" value="<?php echo $u['estado'] ? 0 : 1; ?>">
-                                    <button type="submit" class="btn-icon-action delete" title="<?php echo $u['estado'] ? 'Desactivar' : 'Activar'; ?>">
-                                        <i class="fa-solid <?php echo $u['estado'] ? 'fa-trash-can' : 'fa-user-check'; ?>"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
+    <div style="display:flex; justify-content:center; gap:6px;">
+        <form action="usuarios.php?rol=<?php echo $filtro_rol; ?>" method="POST" onsubmit="return confirm('¿Confirmas cambiar el estado de este usuario?');">
+            <input type="hidden" name="accion" value="cambiar_estado">
+            <input type="hidden" name="id_usuario" value="<?php echo $u['id_usuario']; ?>">
+            <input type="hidden" name="nuevo_estado" value="<?php echo $u['estado'] ? 0 : 1; ?>">
+            <button type="submit" class="btn-icon-action delete" title="<?php echo $u['estado'] ? 'Desactivar' : 'Activar'; ?>">
+                <i class="fa-solid <?php echo $u['estado'] ? 'fa-user-slash' : 'fa-user-check'; ?>"></i>
+            </button>
+        </form>
+        <?php if ($u['id_usuario'] != $_SESSION['id_usuario']): ?>
+            <form action="usuarios.php?rol=<?php echo $filtro_rol; ?>" method="POST" onsubmit="return confirm('¿Eliminar PERMANENTEMENTE a <?php echo htmlspecialchars(addslashes($u['apellidos'] . " " . $u['nombres'])); ?>? Esta acción no se puede deshacer.');">
+                <input type="hidden" name="accion" value="eliminar">
+                <input type="hidden" name="id_usuario" value="<?php echo $u['id_usuario']; ?>">
+                <button type="submit" class="btn-icon-action delete" title="Eliminar permanentemente">
+                    <i class="fa-solid fa-user-xmark"></i>
+                </button>
+            </form>
+        <?php endif; ?>
+    </div>
+</td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

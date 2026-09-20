@@ -36,8 +36,7 @@ if ($stmt_ep) {
 
 // 2. Consultar historial de asistencias PUBLICADAS del estudiante
 $asistencias = [];
-$resumen = ['Presente' => 0, 'Falta' => 0, 'Permiso' => 0];
-
+$resumen = ['Presente' => 0, 'Falta' => 0, 'Atraso' => 0, 'Permiso' => 0];
 if ($id_paralelo > 0) {
     $sql_asistencia = "SELECT la.fecha, h.hora_inicio, h.hora_fin, 
                               m.nombre_materia, 
@@ -101,6 +100,14 @@ require_once "../includes/header_panel.php";
         </div>
         <span style="font-size: 1.8rem;">❌</span>
     </div>
+    
+    <div class="card" style="padding: 15px; border-left: 5px solid #f57c00; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <span style="font-size: 0.8rem; color: #4b5563; font-weight: 600;">ATRASOS</span>
+            <h3 style="margin: 0; color: #f57c00; font-size: 1.5rem;"><?php echo $resumen['Atraso']; ?></h3>
+        </div>
+        <span style="font-size: 1.8rem;">⏰</span>
+    </div>
 
     <div class="card" style="padding: 15px; border-left: 5px solid #0288d1; display: flex; align-items: center; justify-content: space-between;">
         <div>
@@ -145,6 +152,8 @@ require_once "../includes/header_panel.php";
                                 $badge_bg = '#e8f5e9'; $badge_c = '#2e7d32'; $label = 'Presente';
                                 if ($a['estado_asistencia'] === 'Falta') {
                                     $badge_bg = '#ffebee'; $badge_c = '#c62828'; $label = 'Falta';
+                                } elseif ($a['estado_asistencia'] === 'Atraso') {
+                                    $badge_bg = '#fff3e0'; $badge_c = '#f57c00'; $label = 'Atraso';
                                 } elseif ($a['estado_asistencia'] === 'Permiso') {
                                     $badge_bg = '#e1f5fe'; $badge_c = '#0288d1'; $label = 'Permiso / Licencia';
                                 }

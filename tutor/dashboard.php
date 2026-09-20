@@ -27,7 +27,7 @@ mysqli_stmt_bind_param($stmt_av, "i", $id_docente);
 mysqli_stmt_execute($stmt_av);
 $avisos_vigentes = mysqli_fetch_all(mysqli_stmt_get_result($stmt_av), MYSQLI_ASSOC);
 
-// Detectar la jornada actual del docente
+// Detectar la jornada actual del docente (curso con el que tiene clase justo ahora)
 $dias_map = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 7 => null];
 $hoy_dia = $dias_map[(int)date('N')];
 $hora_actual = date('H:i:s');
@@ -49,7 +49,29 @@ if ($hoy_dia) {
 
 $id_paralelo = $jornada_actual['id_paralelo'] ?? 0;
 $id_materia = $jornada_actual['id_materia'] ?? 0;
-$trimestre = 1;
+
+// Trimestre actual real, según las fechas definidas por admin (Gestión Académica)
+$hoy_fecha = date('Y-m-d');
+$sql_tri = "SELECT t.numero FROM trimestres t
+            INNER JOIN gestiones g ON t.id_gestion = g.id_gestion
+            WHERE g.estado = 'Activa' AND t.fecha_inicio <= ? AND t.fecha_fin >= ?
+            LIMIT 1";
+$stmt_tri = mysqli_prepare($conexion, $sql_tri);
+mysqli_stmt_bind_param($stmt_tri, "ss", $hoy_fecha, $hoy_fecha);
+mysqli_stmt_execute($stmt_tri);
+$row_tri = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt_tri));
+mysqli_stmt_close($stmt_tri);
+$trimestre = $row_tri['numero'] ?? null;
+
+// Materias que imparte (referencia fija, sin importar el horario actual)
+$sql_mat = "SELECT DISTINCT m.nombre_materia
+            FROM horarios h INNER JOIN materias m ON h.id_materia = m.id_materia
+            WHERE h.id_docente = ? ORDER BY m.nombre_materia ASC";
+$stmt_mat = mysqli_prepare($conexion, $sql_mat);
+mysqli_stmt_bind_param($stmt_mat, "i", $id_docente);
+mysqli_stmt_execute($stmt_mat);
+$materias_docente = array_column(mysqli_fetch_all(mysqli_stmt_get_result($stmt_mat), MYSQLI_ASSOC), 'nombre_materia');
+mysqli_stmt_close($stmt_mat);
 ?>
 
 <style>
@@ -340,14 +362,25 @@ $trimestre = 1;
             <div>
                 <h2>¡Hola, <?php echo htmlspecialchars($nombre_docente); ?>!</h2>
                 <p>Bienvenido al panel docente de la U.E. Jesús de Nazareth.</p>
-                <div class="welcome-tags">
-                    <span class="tag-pill">📅 Hoy es <?php echo date('d/m/Y'); ?></span>
+                                <div class="welcome-tags">
+                    <span class="tag-pill">📅 <?php echo $hoy_dia ?? 'Domingo'; ?>, <?php echo date('d/m/Y'); ?></span>
+
+                    <span class="tag-pill" style="background: <?php echo $trimestre ? '#dbeafe' : '#f1f5f9'; ?>; color: <?php echo $trimestre ? '#1d4ed8' : '#64748b'; ?>;">
+                        🗓️ <?php echo $trimestre ? "Trimestre $trimestre" : 'Sin trimestre activo'; ?>
+                    </span>
+
                     <?php if ($jornada_actual): ?>
                         <span class="tag-pill" style="background: #fef3c7; color: #b45309;">
-                            🟡 Tu jornada: <strong><?php echo htmlspecialchars($jornada_actual['nombre_materia']); ?> (<?php echo $jornada_actual['grado']; ?>° "<?php echo $jornada_actual['letra']; ?>")</strong>
+                            🟡 Tu curso ahora: <strong><?php echo $jornada_actual['grado']; ?>° "<?php echo $jornada_actual['letra']; ?>"</strong>
                         </span>
                     <?php else: ?>
                         <span class="tag-pill">⚪ Fuera de horario de clases</span>
+                    <?php endif; ?>
+
+                    <?php if (!empty($materias_docente)): ?>
+                        <span class="tag-pill" title="Materias que impartís">
+                            📚 <?php echo htmlspecialchars(implode(', ', $materias_docente)); ?>
+                        </span>
                     <?php endif; ?>
                 </div>
             </div>

@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
                 $stmt_det = mysqli_prepare($conexion, $sql_up_det);
 
                 foreach ($estados_estudiantes as $id_est => $est_val) {
-                    $est_clean = in_array($est_val, ['Presente', 'Falta', 'Permiso']) ? $est_val : 'Falta';
+                    $est_clean = in_array($est_val, ['Presente', 'Falta', 'Atraso', 'Permiso']) ? $est_val : 'Falta';
                     mysqli_stmt_bind_param($stmt_det, "iis", $id_lista, $id_est, $est_clean);
                     mysqli_stmt_execute($stmt_det);
                 }
@@ -265,7 +265,7 @@ require_once "../includes/header_panel.php";
                         <tr style="border-bottom: 2px solid var(--border); text-align: left;">
                             <th style="padding: 10px 8px;">C.I.</th>
                             <th style="padding: 10px 8px;">Estudiante</th>
-                            <th style="padding: 10px 8px; text-align: center;">Estado (Presente / Falta / Permiso)</th>
+                            <th style="padding: 10px 8px; text-align: center;">Estado (Presente / Falta / Atraso / Permiso)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -276,14 +276,17 @@ require_once "../includes/header_panel.php";
                                 <td style="padding: 10px 8px; text-align: center;">
                                     <div style="display: inline-flex; gap: 15px;">
                                         <label style="color: #2e7d32; font-weight: 600; cursor: pointer;">
-                                            <input type="radio" name="asistencia[<?php echo $est['id_usuario']; ?>]" value="Presente" <?php echo ($est['estado_asistencia'] === 'Presente') ? 'checked' : ''; ?>> Presente
-                                        </label>
-                                        <label style="color: #c62828; font-weight: 600; cursor: pointer;">
-                                            <input type="radio" name="asistencia[<?php echo $est['id_usuario']; ?>]" value="Falta" <?php echo ($est['estado_asistencia'] === 'Falta') ? 'checked' : ''; ?>> Falta
-                                        </label>
-                                        <label style="color: #0288d1; font-weight: 600; cursor: pointer;">
-                                            <input type="radio" name="asistencia[<?php echo $est['id_usuario']; ?>]" value="Permiso" <?php echo ($est['estado_asistencia'] === 'Permiso') ? 'checked' : ''; ?>> Permiso
-                                        </label>
+    <input type="radio" name="asistencia[<?php echo $est['id_usuario']; ?>]" value="Presente" <?php echo ($est['estado_asistencia'] === 'Presente') ? 'checked' : ''; ?>> Presente
+</label>
+<label style="color: #c62828; font-weight: 600; cursor: pointer;">
+    <input type="radio" name="asistencia[<?php echo $est['id_usuario']; ?>]" value="Falta" <?php echo ($est['estado_asistencia'] === 'Falta') ? 'checked' : ''; ?>> Falta
+</label>
+<label style="color: #f57c00; font-weight: 600; cursor: pointer;">
+    <input type="radio" name="asistencia[<?php echo $est['id_usuario']; ?>]" value="Atraso" <?php echo ($est['estado_asistencia'] === 'Atraso') ? 'checked' : ''; ?>> Atraso
+</label>
+<label style="color: #0288d1; font-weight: 600; cursor: pointer;">
+    <input type="radio" name="asistencia[<?php echo $est['id_usuario']; ?>]" value="Permiso" <?php echo ($est['estado_asistencia'] === 'Permiso') ? 'checked' : ''; ?>> Permiso
+</label>
                                     </div>
                                 </td>
                             </tr>

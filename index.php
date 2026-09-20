@@ -1,6 +1,15 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+    require_once "includes/conexion.php";
+
+$noticias_home = mysqli_fetch_all(mysqli_query($conexion,
+    "SELECT titulo, fecha_publicacion, imagen FROM noticias WHERE estado = 1 ORDER BY fecha_publicacion DESC LIMIT 3"
+), MYSQLI_ASSOC);
+
+$eventos_home = mysqli_fetch_all(mysqli_query($conexion,
+    "SELECT titulo, lugar_hora, fecha_evento FROM eventos WHERE estado = 1 AND fecha_evento >= CURDATE() ORDER BY fecha_evento ASC LIMIT 3"
+), MYSQLI_ASSOC);
 }
 ?>
 <!DOCTYPE html>
@@ -242,41 +251,39 @@ if (session_status() === PHP_SESSION_NONE) {
 
             <!-- Últimas Noticias -->
             <div class="card-box">
-                <h3><i class="fa-solid fa-bullhorn"></i> Últimas Noticias</h3>
-                <div class="news-item">
-                    <div class="news-img"></div>
-                    <div>
-                        <strong style="font-size: 0.8rem; display: block;">Participación en Olimpiadas</strong>
-                        <small style="color: var(--text-muted);">12 de agosto de 2025</small>
-                    </div>
-                </div>
-                <div class="news-item">
-                    <div class="news-img"></div>
-                    <div>
-                        <strong style="font-size: 0.8rem; display: block;">Feria Científica 2025</strong>
-                        <small style="color: var(--text-muted);">5 de agosto de 2025</small>
-                    </div>
+    <h3><i class="fa-solid fa-bullhorn"></i> Últimas Noticias</h3>
+    <?php if (!empty($noticias_home)): ?>
+        <?php foreach ($noticias_home as $n): ?>
+            <div class="news-item">
+                <div class="news-img" <?php echo !empty($n['imagen']) ? 'style="background-image:url(\'' . htmlspecialchars($n['imagen']) . '\');background-size:cover;"' : ''; ?>></div>
+                <div>
+                    <strong style="font-size: 0.8rem; display: block;"><?php echo htmlspecialchars($n['titulo']); ?></strong>
+                    <small style="color: var(--text-muted);"><?php echo date("d \d\e F \d\e Y", strtotime($n['fecha_publicacion'])); ?></small>
                 </div>
             </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">No hay noticias publicadas por el momento.</p>
+    <?php endif; ?>
+</div>
 
             <!-- Próximos Eventos -->
             <div class="card-box">
-                <h3><i class="fa-solid fa-calendar-days"></i> Próximos Eventos</h3>
-                <div class="event-item">
-                    <div class="event-badge">15<br><small>AGO</small></div>
-                    <div>
-                        <strong style="font-size: 0.8rem; display: block;">Acto Cívico</strong>
-                        <small style="color: var(--text-muted);">Patio principal - 08:00 a.m.</small>
-                    </div>
-                </div>
-                <div class="event-item">
-                    <div class="event-badge" style="background: #d97706;">22<br><small>AGO</small></div>
-                    <div>
-                        <strong style="font-size: 0.8rem; display: block;">Feria de Ciencias</strong>
-                        <small style="color: var(--text-muted);">Salón de usos múltiples</small>
-                    </div>
+    <h3><i class="fa-solid fa-calendar-days"></i> Próximos Eventos</h3>
+    <?php if (!empty($eventos_home)): ?>
+        <?php foreach ($eventos_home as $ev): ?>
+            <div class="event-item">
+                <div class="event-badge"><?php echo date('d', strtotime($ev['fecha_evento'])); ?><br><small><?php echo strtoupper(date('M', strtotime($ev['fecha_evento']))); ?></small></div>
+                <div>
+                    <strong style="font-size: 0.8rem; display: block;"><?php echo htmlspecialchars($ev['titulo']); ?></strong>
+                    <small style="color: var(--text-muted);"><?php echo htmlspecialchars($ev['lugar_hora'] ?? ''); ?></small>
                 </div>
             </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">No hay eventos próximos registrados.</p>
+    <?php endif; ?>
+</div>
         </div>
 
     </div>

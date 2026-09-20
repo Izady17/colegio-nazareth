@@ -2,30 +2,30 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!isset($ruta_base)) {
-    $ruta_base = "./";
+if (!isset($ruta_base)) {$ruta_base = "./";
 }
 
-$rol_actual = $_SESSION['rol'] ?? '';
+$rol_actual =$_SESSION['rol'] ?? '';
 $pagina_actual = basename($_SERVER['PHP_SELF']);
 
 // Nombre e iniciales para el avatar
-$nombre_mostrar = $_SESSION['nombre_completo'] ?? $_SESSION['nombre'] ?? $_SESSION['nombres'] ?? 'Usuario';
+$nombre_mostrar =$_SESSION['nombre_completo'] ?? $_SESSION['nombre'] ?? $_SESSION['nombres'] ?? 'Usuario';
 $inicial = mb_strtoupper(mb_substr(trim($nombre_mostrar), 0, 1));
 
-// Menú lateral usando clases de FontAwesome en lugar de Emojis
+// Menú lateral usando clases de FontAwesome
 $menu = [];
-if ($rol_actual === 'administrador') {
-    $menu = [
+if ($rol_actual === 'administrador') {$menu = [
         ['icon' => 'fa-solid fa-house', 'label' => 'Inicio', 'href' => $ruta_base . 'admin/dashboard.php', 'match' => ['dashboard.php']],
         ['icon' => 'fa-solid fa-calendar-days', 'label' => 'Horarios Académicos', 'href' => $ruta_base . 'admin/horarios.php', 'match' => ['horarios.php']],
         ['icon' => 'fa-solid fa-clipboard-user', 'label' => 'Control de Asistencia', 'href' => $ruta_base . 'admin/asistencia.php', 'match' => ['asistencia.php']],
         ['icon' => 'fa-solid fa-users-gear', 'label' => 'Gestión de Usuarios', 'href' => $ruta_base . 'admin/usuarios.php', 'match' => ['usuarios.php']],
         ['icon' => 'fa-solid fa-bullhorn', 'label' => 'Avisos Institucionales', 'href' => $ruta_base . 'admin/avisos.php', 'match' => ['avisos.php']],
         ['icon' => 'fa-solid fa-key', 'label' => 'PINs de Padres', 'href' => $ruta_base . 'admin/pines_padres.php', 'match' => ['pines_padres.php']],
+        ['icon' => 'fa-solid fa-globe', 'label' => 'Contenido Web', 'href' => $ruta_base . 'admin/contenido_web.php', 'match' => ['contenido_web.php']],
+        ['icon' => 'fa-solid fa-trophy', 'label' => 'Actividades y Logros', 'href' => $ruta_base . 'admin/actividades_logros.php', 'match' => ['actividades_logros.php']],
+        ['icon' => 'fa-solid fa-calendar-days', 'label' => 'Gestión Académica', 'href' => $ruta_base . 'admin/trimestres.php', 'match' => ['trimestres.php']],
     ];
-} elseif ($rol_actual === 'docente') {
-    $menu = [
+} elseif ($rol_actual === 'docente' ||$rol_actual === 'tutor' || $rol_actual === 'profesor') {$menu = [
         ['icon' => 'fa-solid fa-house', 'label' => 'Inicio', 'href' => $ruta_base . 'tutor/dashboard.php', 'match' => ['dashboard.php']],
         ['icon' => 'fa-solid fa-calendar-days', 'label' => 'Horario de Clases', 'href' => $ruta_base . 'tutor/horarios.php', 'match' => ['horarios.php']],
         ['icon' => 'fa-solid fa-pen-to-square', 'label' => 'Gestión de Actividades', 'href' => $ruta_base . 'tutor/actividades.php', 'match' => ['actividades.php']],
@@ -33,8 +33,7 @@ if ($rol_actual === 'administrador') {
         ['icon' => 'fa-solid fa-clipboard-check', 'label' => 'Asistencia', 'href' => $ruta_base . 'tutor/asistencia.php', 'match' => ['asistencia.php', 'consulta_asistencia.php']],
         ['icon' => 'fa-solid fa-paper-plane', 'label' => 'Enviar Recordatorio', 'href' => $ruta_base . 'tutor/enviar-recordatorio.php', 'match' => ['enviar-recordatorio.php']],
     ];
-} elseif ($rol_actual === 'estudiante') {
-    $menu = [
+} elseif ($rol_actual === 'estudiante') {$menu = [
         ['icon' => 'fa-solid fa-house', 'label' => 'Inicio', 'href' => $ruta_base . 'estudiante/dashboard.php', 'match' => ['dashboard.php']],
         ['icon' => 'fa-solid fa-calendar-days', 'label' => 'Horario de Clases', 'href' => $ruta_base . 'estudiante/horario.php', 'match' => ['horario.php']],
         ['icon' => 'fa-solid fa-book-bookmark', 'label' => 'Tareas y Actividades', 'href' => $ruta_base . 'estudiante/tareas.php', 'match' => ['tareas.php']],
@@ -42,8 +41,7 @@ if ($rol_actual === 'administrador') {
         ['icon' => 'fa-solid fa-bell', 'label' => 'Recordatorios', 'href' => $ruta_base . 'estudiante/recordatorios.php', 'match' => ['recordatorios.php']],
         ['icon' => 'fa-solid fa-chalkboard-user', 'label' => 'Plantel Docente', 'href' => $ruta_base . 'public/docentes.php', 'match' => []],
     ];
-} elseif ($rol_actual === 'padre') {
-    $menu = [
+} elseif ($rol_actual === 'padre') {$menu = [
         ['icon' => 'fa-solid fa-house', 'label' => 'Inicio', 'href' => $ruta_base . 'padres/dashboard.php', 'match' => ['dashboard.php']],
     ];
 }
@@ -55,12 +53,11 @@ if ($rol_actual === 'administrador') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>U.E. Jesús de Nazareth - Panel</title>
     
-    <!-- Hojas de estilo y FontAwesome para iconos profesionales -->
+    <!-- Hojas de estilo y FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="<?php echo $ruta_base; ?>assets/css/styles.css">
 
     <style>
-        /* Ajustes de estilo inline para complementar styles.css */
         .sidebar-brand {
             display: flex;
             align-items: center;
@@ -118,9 +115,30 @@ if ($rol_actual === 'administrador') {
         @media (max-width: 768px) {
             .btn-toggle-mobile { display: block; }
         }
+
+        /* Widget IA Flotante */
+        #ai-widget-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 9999;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        #ai-chat-box {
+            display: none;
+            width: 350px;
+            height: 460px;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            border: 1px solid #e2e8f0;
+            flex-direction: column;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
-<body style="display:block;">
+<body>
 
 <div class="app-shell">
     <!-- MENÚ LATERAL (SIDEBAR) -->
@@ -134,8 +152,8 @@ if ($rol_actual === 'administrador') {
         </div>
 
         <ul class="sidebar-nav">
-            <?php foreach ($menu as $item): ?>
-                <?php $activo = in_array($pagina_actual, $item['match']); ?>
+            <?php foreach ($menu as$item): ?>
+                <?php $activo = in_array($pagina_actual,$item['match']); ?>
                 <li>
                     <a href="<?php echo $item['href']; ?>" class="<?php echo $activo ? 'active' : ''; ?>">
                         <span class="icon"><i class="<?php echo $item['icon']; ?>"></i></span>
@@ -193,9 +211,96 @@ if ($rol_actual === 'administrador') {
         <!-- CONTENIDO DINÁMICO DEL PANEL -->
         <div class="panel-content">
 
+<!-- WIDGET INTEGRADO DE ASISTENTE IA -->
+<div id="ai-widget-container">
+    <div id="ai-chat-box">
+        <div style="background: #800020; color: #ffffff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.2rem;">🤖</span>
+                <strong style="font-size: 0.95rem;">Asistente Nazareth IA</strong>
+            </div>
+            <button id="close-ai" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer;">&times;</button>
+        </div>
+
+        <div id="ai-messages" style="flex: 1; padding: 12px; overflow-y: auto; background: #f8fafc; font-size: 0.88rem; display: flex; flex-direction: column; gap: 10px;">
+            <div style="background: #e2e8f0; color: #1e293b; padding: 10px 12px; border-radius: 8px; max-width: 85%;">
+                👋 ¡Hola, <?php echo htmlspecialchars($nombre_mostrar); ?>! Soy la IA del colegio. Pregúntame sobre tus clases, asistencias o tareas.
+            </div>
+        </div>
+
+        <div style="padding: 10px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; gap: 6px;">
+            <input type="text" id="ai-input" placeholder="Escribe tu consulta..." style="flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; outline: none;">
+            <button id="ai-send" style="background: #800020; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                ➤
+            </button>
+        </div>
+    </div>
+
+    <button id="toggle-ai" style="background: #800020; color: white; border: none; border-radius: 50%; width: 55px; height: 55px; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.3); float: right; display: flex; align-items: center; justify-content: center;">
+        🤖
+    </button>
+</div>
+
+<!-- SCRIPTS DE INTERACCIÓN -->
 <script>
 function toggleSidebar() {
-    const sidebar = id = document.getElementById('sidebarNav');
+    const sidebar = document.getElementById('sidebarNav');
     sidebar.classList.toggle('active');
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const box = document.getElementById('ai-chat-box');
+    const toggle = document.getElementById('toggle-ai');
+    const close = document.getElementById('close-ai');
+    const send = document.getElementById('ai-send');
+    const input = document.getElementById('ai-input');
+    const messages = document.getElementById('ai-messages');
+
+    if (toggle && box && close) {
+        toggle.onclick = function() {
+            box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'flex' : 'none';
+        };
+        close.onclick = function() {
+            box.style.display = 'none';
+        };
+    }
+
+    function enviarPreguntaIA() {
+        const txt = input.value.trim();
+        if (!txt) return;
+
+        messages.innerHTML += `<div style="background: #800020; color: white; padding: 8px 12px; border-radius: 8px; max-width: 85%; align-self: flex-end;">${txt}</div>`;
+        input.value = '';
+        messages.scrollTop = messages.scrollHeight;
+
+        const loading = document.createElement('div');
+        loading.style.cssText = 'background: #e2e8f0; color: #64748b; padding: 6px 10px; border-radius: 8px; align-self: flex-start; font-style: italic;';
+        loading.textContent = 'Procesando consulta...';
+        messages.appendChild(loading);
+        messages.scrollTop = messages.scrollHeight;
+
+        let body = new FormData();
+        body.append('pregunta', txt);
+
+        fetch('<?php echo $ruta_base; ?>api/asistente_ia.php', { method: 'POST', body: body })
+        .then(r => r.json())
+        .then(data => {
+            messages.removeChild(loading);
+            messages.innerHTML += `<div style="background: #e2e8f0; color: #1e293b; padding: 8px 12px; border-radius: 8px; max-width: 85%; align-self: flex-start; white-space: pre-wrap;">${data.respuesta}</div>`;
+            messages.scrollTop = messages.scrollHeight;
+        })
+        .catch(err => {
+            messages.removeChild(loading);
+            messages.innerHTML += `<div style="background: #fee2e2; color: #991b1b; padding: 8px 12px; border-radius: 8px; align-self: flex-start;">Error al conectar con la IA.</div>`;
+            messages.scrollTop = messages.scrollHeight;
+        });
+    }
+
+    if (send && input) {
+        send.onclick = enviarPreguntaIA;
+        input.onkeypress = function(e) { 
+            if (e.key === 'Enter') enviarPreguntaIA(); 
+        };
+    }
+});
 </script>

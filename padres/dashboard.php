@@ -40,7 +40,7 @@ $entrevistas_pendientes = mysqli_fetch_all(mysqli_stmt_get_result($stmt_ent), MY
 mysqli_stmt_close($stmt_ent);
 
 // 3. Resumen de asistencia (solo listas ya publicadas)
-$resumen_asistencia = ['Presente' => 0, 'Falta' => 0, 'Permiso' => 0];
+$resumen_asistencia = ['Presente' => 0, 'Falta' => 0, 'Atraso' => 0, 'Permiso' => 0];
 $sql_asist = "SELECT ad.estado
               FROM asistencia_detalle ad
               INNER JOIN listas_asistencia la ON ad.id_lista = la.id_lista
@@ -119,6 +119,10 @@ require_once "../includes/header_panel.php";
     <div class="card" style="padding: 15px; border-left: 5px solid #c62828;">
         <span style="font-size: 0.8rem; color: #4b5563; font-weight: 600;">FALTAS REGISTRADAS</span>
         <h3 style="margin: 5px 0 0; color: #c62828; font-size: 1.8rem;"><?php echo $resumen_asistencia['Falta']; ?></h3>
+    </div>
+    <div class="card" style="padding: 15px; border-left: 5px solid #f57c00;">
+        <span style="font-size: 0.8rem; color: #4b5563; font-weight: 600;">ATRASOS</span>
+        <h3 style="margin: 5px 0 0; color: #f57c00; font-size: 1.8rem;"><?php echo $resumen_asistencia['Atraso']; ?></h3>
     </div>
     <div class="card" style="padding: 15px; border-left: 5px solid #0288d1;">
         <span style="font-size: 0.8rem; color: #4b5563; font-weight: 600;">PERMISOS</span>

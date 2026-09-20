@@ -202,11 +202,13 @@ require_once "../includes/header_panel.php";
                             <td style="padding: 10px 8px; text-align: center;">
                                 <?php
                                 $badge_bg = '#e8f5e9'; $badge_c = '#2e7d32'; $label = 'Presente';
-                                if ($est['estado_asistencia'] === 'Falta') {
-                                    $badge_bg = '#ffebee'; $badge_c = '#c62828'; $label = 'Falta';
-                                } elseif ($est['estado_asistencia'] === 'Permiso') {
-                                    $badge_bg = '#e1f5fe'; $badge_c = '#0288d1'; $label = 'Permiso / Licencia';
-                                }
+if ($a['estado_asistencia'] === 'Falta') {
+    $badge_bg = '#ffebee'; $badge_c = '#c62828'; $label = 'Falta';
+} elseif ($a['estado_asistencia'] === 'Atraso') {
+    $badge_bg = '#fff3e0'; $badge_c = '#f57c00'; $label = 'Atraso';
+} elseif ($a['estado_asistencia'] === 'Permiso') {
+    $badge_bg = '#e1f5fe'; $badge_c = '#0288d1'; $label = 'Permiso / Licencia';
+}
                                 ?>
                                 <span style="background: <?php echo $badge_bg; ?>; color: <?php echo $badge_c; ?>; padding: 4px 12px; border-radius: 12px; font-size: 0.82rem; font-weight: 700;">
                                     <?php echo $label; ?>
