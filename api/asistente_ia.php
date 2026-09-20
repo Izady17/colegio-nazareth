@@ -10,7 +10,7 @@ if (empty($pregunta)) {
 }
 
 // 1. Tu clave de API que empieza por AQ.
-$api_key = "AQ.Ab8RN6J-9wJygTt6Twb4se-ueXNPIxUuA2kxUOrpHBH4-p1JQg"; 
+$api_key = ""; 
 
 // 2. Endpoint oficial
 $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
